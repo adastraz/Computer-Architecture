@@ -75,7 +75,7 @@ class CPU:
         }
 
         if op in self.alu_operations:
-            self.alu_operations[op](reg_a, reg_b)
+            self.alu_operations[op]()
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -146,30 +146,30 @@ class CPU:
         self.reg[MAR] = MDR
         self.pc += 3
 
-    def add(self, reg_a, reg_b):
-        self.reg[reg_a] += self.reg[reg_b]
+    def add(self):
+        self.reg[self.pc + 1] += self.reg[self.pc + 2]
         self.pc += 3
-        print(f"ADD at REG[{reg_a}]: {self.reg[reg_a]}")
+        print(f"ADD at REG[{self.pc + 1}]: {self.reg[self.pc + 1]}")
     
-    def sub(self, reg_a, reg_b):
-        self.reg[reg_a] -= self.reg[reg_b]
+    def sub(self):
+        self.reg[self.pc + 1] -= self.reg[self.pc + 2]
         self.pc += 3
-        print(f"SUB at REG[{reg_a}]: {self.reg[reg_a]}")
+        print(f"SUB at REG[{self.pc + 1}]: {self.reg[self.pc + 1]}")
 
-    def mul(self, reg_a, reg_b):
-        self.reg[reg_a] *= self.reg[reg_b]
+    def mul(self):
+        self.reg[self.pc + 1] *= self.reg[self.pc + 2]
         self.pc += 3
-        print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
+        print(f"MUL at REG[{self.pc + 1}]: {self.reg[self.pc + 1]}")
 
-    def div(self, reg_a, reg_b):
-        self.reg[reg_a] /= self.reg[reg_b]
+    def div(self):
+        self.reg[self.pc + 1] /= self.reg[self.pc + 2]
         self.pc += 3
-        print(f"DIV at REG[{reg_a}]: {self.reg[reg_a]}")
+        print(f"DIV at REG[{self.pc + 1}]: {self.reg[self.pc + 1]}")
 
-    def mod(self, reg_a, reg_b):
-        self.reg[reg_a] %= self.reg[reg_b]
+    def mod(self):
+        self.reg[self.pc + 1] %= self.reg[self.pc + 2]
         self.pc += 3
-        print(f"MOD at REG[{reg_a}]: {self.reg[reg_a]}")
+        print(f"MOD at REG[{self.pc + 1}]: {self.reg[self.pc + 1]}")
 
     def push(self):
         # self.reg[7] = 104 reg 0 - 8
