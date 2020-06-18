@@ -1,3 +1,4 @@
+
 """CPU functionality."""
 
 import sys
@@ -7,44 +8,87 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
+        self.ram = [None] * 256
         self.pc = 0
-        self.reg = [0] * 8
+        self.reg = [None] * 8
+        self.running = True
+        self.sp = 7
+        self.stack_start = 16
+        self.stack_end = 240
         self.LDI = 0b10000010
         self.PRN = 0b01000111
         self.HLT = 0b00000001
-        self.ram = [0] * 256
+        self.ADD = 0b10100000
+        self.SUB = 0b10100001
+        self.MUL = 0b10100010
+        self.MOD = 0b10100100
+        self.PUSH = 0b01000101
+        self.POP = 0b01000110
 
-    def load(self):
+    def load(self, program):
         """Load a program into memory."""
-
-        address = 0
-
-        # For now, we've just hardcoded a program:
-
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
-
-        for instruction in program:
+        #    index     value        provide from arg
+        for address, instruction in enumerate(program):
             self.ram[address] = instruction
             address += 1
 
+    def run(self):
+        """Run the CPU.       
+        1. read mem at PC
+        2. store result in local var
+        3. turn into hash_tables
+        """
+        
+        while self.running is True:
+            IR = self.ram[self.pc]
+            branch_table = {
+                self.LDI: self.ldi,
+                self.PRN: self.prn,
+                self.HLT: self.hlt,
+                self.ADD: self.add,
+                self.SUB: self.sub,
+                self.MUL: self.mul,
+                self.DIV: self.div,
+                self.MOD: self.mod,
+                self.PUSH: self.push,
+                self.POP: self.pop
+            }
+            if IR in branch_table:
+                branch_table[IR]()
+            else:
+                print(f'Unknown instruction: {IR}, at address PC: {self.pc}')
+                sys.exit(1)
+            # branch_table.get(IR)()
 
     def alu(self, op, reg_a, reg_b):
-        """ALU operations."""
-
+        """ALU operations.
+        Algorythmic Logic Units
+        # add masking?
+            use repl
+        """
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        elif op == "SUB": 
+            self.pc += 3
+            print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
+        elif op == "SUB":
             self.reg[reg_a] -= self.reg[reg_b]
+            self.pc += 3
+            print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
+            self.pc += 3
+            print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
+        elif op == "DIV":
+            self.reg[reg_a] /= self.reg[reg_b]
+            self.pc += 3
+            print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
+        elif op == "MOD":
+            self.reg[reg_a] %= self.reg[reg_b]
+            self.pc += 3
+            print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
         else:
-            raise Exception("Unsupported ALU operation")
+            raise Exception(f"Unsupported ALU operation: {op}")
+            self.trace()
 
     def trace(self):
         """
@@ -66,32 +110,21 @@ class CPU:
 
         print()
 
-    def ram_read(self, MAR):
-        return self.ram[MAR]
-    
-    def ram_write(self, MAR, MDR):
-        self.ram[MAR] = MDR
 
-    def run(self):
-        """Run the CPU."""
-        running = True
+    def ram_read(self, address):
+        return self.ram[address]
 
-        while running:
-            IR = self.ram[self.pc]
-            if IR == self.LDI:
-                self.ldi()
-            if IR == self.PRN:
-                self.prn()           
-            if IR == self.HLT:
-                running = self.hlt()
+    def ram_write(self, value, address):
+        self.ram[address] = value
 
     def hlt(self):
+        self.running = False
         self.pc += 1
-        return False
 
     def prn(self):
         MAR = self.ram[self.pc + 1]
-        print(self.reg[MAR])
+        self.reg[0]
+        print("Returning", self.reg[MAR])
         self.pc +=2
 
     def ldi(self):
@@ -100,3 +133,47 @@ class CPU:
         self.reg[MAR] = MDR
         self.pc += 3
 
+    def add(self):
+        self.alu("ADD", 0, 1)
+    
+    def sub(self):
+        self.alu("SUB", 0, 1)
+
+    def mul(self):
+        self.alu("MUL", 0, 1)
+
+    def mul(self):
+        self.alu("MUL", 0, 1)
+
+    def div(self):
+        self.alu("DIV", 0, 1)
+
+    def mod(self):
+        self.alu("MOD", 0, 1)
+
+    def push(self):
+        # self.reg[7] = 104 reg 0 - 8
+        self.reg[self.sp] -= 1 
+        reg_id = self.ram[self.pc + 1]
+        # value = new ram index after stack push
+        value = self.reg[reg_id]
+        top_loc = self.reg[self.sp]
+        self.ram[top_loc] = value
+        print("PC:", self.pc)
+        print("RAM:", self.ram)
+        print("REG:", self.reg)
+        # print("PUSH", "Reg_LOC:", self.sp , "Ram_Loc:",  reg_id, "Val:", self.ram[top_loc])
+        self.pc += 2
+
+    def pop(self):
+        # OLD Head
+        top_loc = self.reg[self.sp] #244
+        # lets get the register address
+
+        # NEW HEAD
+        reg_id = self.ram[self.pc + 1]
+        # overwrite our reg address with the value of our memory address we are looking at
+        self.reg[reg_id] = self.ram[top_loc]
+
+        self.reg[self.sp] += 1 #243
+        self.pc += 2
