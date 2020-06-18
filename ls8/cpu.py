@@ -66,29 +66,42 @@ class CPU:
         # add masking?
             use repl
         """
-        if op == "ADD":
-            self.reg[reg_a] += self.reg[reg_b]
-            self.pc += 3
-            print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
-        elif op == "SUB":
-            self.reg[reg_a] -= self.reg[reg_b]
-            self.pc += 3
-            print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
-        elif op == "MUL":
-            self.reg[reg_a] *= self.reg[reg_b]
-            self.pc += 3
-            print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
-        elif op == "DIV":
-            self.reg[reg_a] /= self.reg[reg_b]
-            self.pc += 3
-            print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
-        elif op == "MOD":
-            self.reg[reg_a] %= self.reg[reg_b]
-            self.pc += 3
-            print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
+        self.alu_operations = {
+            'MUL': self.mul,
+            'ADD': self.add,
+            'DIV': self.div,
+            'SUB': self.sub,
+            'MOD': self.mod
+        }
+
+        if op in self.alu_operations:
+            self.alu_operations[op](reg_a, reg_b)
         else:
-            raise Exception(f"Unsupported ALU operation: {op}")
-            self.trace()
+            raise Exception("Unsupported ALU operation")
+
+        # if op == "ADD":
+        #     self.reg[reg_a] += self.reg[reg_b]
+        #     self.pc += 3
+        #     print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
+        # elif op == "SUB":
+        #     self.reg[reg_a] -= self.reg[reg_b]
+        #     self.pc += 3
+        #     print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
+        # elif op == "MUL":
+        #     self.reg[reg_a] *= self.reg[reg_b]
+        #     self.pc += 3
+        #     print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
+        # elif op == "DIV":
+        #     self.reg[reg_a] /= self.reg[reg_b]
+        #     self.pc += 3
+        #     print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
+        # elif op == "MOD":
+        #     self.reg[reg_a] %= self.reg[reg_b]
+        #     self.pc += 3
+        #     print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
+        # else:
+        #     raise Exception(f"Unsupported ALU operation: {op}")
+        #     self.trace()
 
     def trace(self):
         """
@@ -133,23 +146,30 @@ class CPU:
         self.reg[MAR] = MDR
         self.pc += 3
 
-    def add(self):
-        self.alu("ADD", 0, 1)
+    def add(self, reg_a, reg_b):
+        self.reg[reg_a] += self.reg[reg_b]
+        self.pc += 3
+        print(f"ADD at REG[{reg_a}]: {self.reg[reg_a]}")
     
-    def sub(self):
-        self.alu("SUB", 0, 1)
+    def sub(self, reg_a, reg_b):
+        self.reg[reg_a] -= self.reg[reg_b]
+        self.pc += 3
+        print(f"SUB at REG[{reg_a}]: {self.reg[reg_a]}")
 
-    def mul(self):
-        self.alu("MUL", 0, 1)
+    def mul(self, reg_a, reg_b):
+        self.reg[reg_a] *= self.reg[reg_b]
+        self.pc += 3
+        print(f"MUL at REG[{reg_a}]: {self.reg[reg_a]}")
 
-    def mul(self):
-        self.alu("MUL", 0, 1)
+    def div(self, reg_a, reg_b):
+        self.reg[reg_a] /= self.reg[reg_b]
+        self.pc += 3
+        print(f"DIV at REG[{reg_a}]: {self.reg[reg_a]}")
 
-    def div(self):
-        self.alu("DIV", 0, 1)
-
-    def mod(self):
-        self.alu("MOD", 0, 1)
+    def mod(self, reg_a, reg_b):
+        self.reg[reg_a] %= self.reg[reg_b]
+        self.pc += 3
+        print(f"MOD at REG[{reg_a}]: {self.reg[reg_a]}")
 
     def push(self):
         # self.reg[7] = 104 reg 0 - 8
